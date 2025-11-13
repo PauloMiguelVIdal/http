@@ -30,17 +30,16 @@ jobs:
       - name: Compile CLI
         if: env.NODE_CLI == 'true'
         run: |
-          CLI_DIR="./src/cli.js"
-          deno bundle --platform deno --minify --output $CLI_DIR src/cli.ts
+          deno bundle --platform deno --minify --output ./src/cli.js ./src/cli.ts
 
       - name: Create package.json for CLI
         if: env.NODE_CLI == 'true'
         run: |
-          PKG_NAME=$(jq -r '.name' jsr.json)
+          CLI_NAME=$(jq -r '.name' jsr.json | awk -F/ '{print $NF}')
           cat > package.json <<EOF
           {
             "bin": {
-              "$PKG_NAME": "$CLI_DIR"
+              "$CLI_NAME": "./src/cli.js"
             }
           }
           EOF

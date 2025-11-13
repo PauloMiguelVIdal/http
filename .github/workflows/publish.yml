@@ -31,7 +31,8 @@ jobs:
         if: env.NODE_CLI == 'true'
         run: |
           mkdir -p _dist/src
-          deno bundle src/cli.ts _dist/src/cli.js
+          CLI_DIR=_dist/src/cli.js
+          deno bundle --platform deno --minify --output $CLI_DIR src/cli.ts
 
       - name: Create package.json for CLI
         if: env.NODE_CLI == 'true'
@@ -40,7 +41,7 @@ jobs:
           cat > package.json <<EOF
           {
             "bin": {
-              "$PKG_NAME": "_dist/src/cli.js"
+              "$PKG_NAME": "$CLI_DIR"
             }
           }
           EOF

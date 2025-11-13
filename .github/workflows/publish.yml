@@ -12,5 +12,38 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check if src/cli.ts exists
+        run: |
+          if [ -f "src/cli.ts" ]; then
+            echo "NODE_CLI=true" >> $GITHUB_ENV
+          else
+            echo "NODE_CLI=false" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Deno
+        if: env.NODE_CLI == 'true'
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v2.5.4
+
+      - name: Compile CLI
+        if: env.NODE_CLI == 'true'
+        run: |
+          mkdir -p _dist/src
+          deno bundle src/cli.ts _dist/src/cli.js
+
+      - name: Create package.json for CLI
+        if: env.NODE_CLI == 'true'
+        run: |
+          PKG_NAME=$(jq -r '.name' jsr.json)
+          cat > package.json <<EOF
+          {
+            "bin": {
+              "$PKG_NAME": "_dist/src/cli.js"
+            }
+          }
+          EOF
+
       - name: Publish package
         run: npx jsr publish
